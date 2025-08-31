@@ -1,4 +1,4 @@
-# luvgo (M1)
+# go-2d (M1)
 
 A Go‑native 2D engine with LÖVE‑style ergonomics. Currently at **Milestone 1**: window, update/draw loop, input, images, and text rendering backed by Ebiten.
 
@@ -41,7 +41,7 @@ Run:
 go run ./examples/text-and-image
 ```
 
-You’ll see “Hello, luvgo!” rendered with your font and the PNG drawn below.
+You’ll see “Hello, go-2d!” rendered with your font and the PNG drawn below.
 
 ## Project layout
 
