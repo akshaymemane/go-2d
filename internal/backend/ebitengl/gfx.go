@@ -1,18 +1,33 @@
 package ebitengl
 
 import (
+	"fmt"
 	"image"
 	"image/color"
-
-	"go-2d/gfx"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	ebitext "github.com/hajimehoshi/ebiten/v2/text"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
+
+	"go-2d/gfx"
 )
 
 type ebImage struct{ img *ebiten.Image }
 
-// Implement gfx.Image
 func (ebImage) IsImage() {}
+
+type ebFont struct{ face font.Face }
+
+func (ebFont) IsFont() {}
+
+type ebText struct {
+	s    string
+	face font.Face
+}
+
+func (ebText) IsText() {}
 
 type ebGfx struct{}
 
@@ -21,6 +36,20 @@ func newGfx() *ebGfx { return &ebGfx{} }
 func (g *ebGfx) NewImage(w, h int) (gfx.Image, error) {
 	img := ebiten.NewImage(w, h)
 	return ebImage{img: img}, nil
+}
+
+func (g *ebGfx) LoadImage(path string) (gfx.Image, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	im, _, err := image.Decode(f)
+	if err != nil {
+		return nil, err
+	}
+	eimg := ebiten.NewImageFromImage(im)
+	return ebImage{img: eimg}, nil
 }
 
 func (g *ebGfx) Clear(c gfx.Color) {
@@ -56,7 +85,7 @@ func (g *ebGfx) Draw(img gfx.Image, opts *gfx.DrawOptions) {
 			n.Tint = gfx.Color{1, 1, 1, 1}
 		}
 	}
-	// Translate origin → scale/rotate → translate to position
+	// Transform pipeline: origin → scale → rotate → position
 	op.GeoM.Translate(-n.OriginX, -n.OriginY)
 	op.GeoM.Scale(n.ScaleX, n.ScaleY)
 	op.GeoM.Rotate(n.Rotation)
@@ -69,6 +98,35 @@ func (g *ebGfx) Draw(img gfx.Image, opts *gfx.DrawOptions) {
 	currentScreen.DrawImage(eimg.img, op)
 }
 
+// Text APIs (M1)
+func (g *ebGfx) NewFont(ttf []byte, size float64) (gfx.Font, error) {
+	ft, err := opentype.Parse(ttf)
+	if err != nil {
+		return nil, err
+	}
+	face, err := opentype.NewFace(ft, &opentype.FaceOptions{Size: size, DPI: 72})
+	if err != nil {
+		return nil, err
+	}
+	return ebFont{face: face}, nil
+}
+
+func (g *ebGfx) NewText(font gfx.Font, s string) (gfx.Text, error) {
+	ef, ok := font.(ebFont)
+	if !ok {
+		return nil, fmt.Errorf("invalid font type")
+	}
+	return ebText{s: s, face: ef.face}, nil
+}
+
+func (g *ebGfx) DrawText(t gfx.Text, x, y float64) {
+	et, ok := t.(ebText)
+	if !ok || currentScreen == nil {
+		return
+	}
+	ebitext.Draw(currentScreen, et.s, et.face, int(x), int(y), color.White)
+}
+
 // A global render target set by the game loop for the current frame.
 var currentScreen *ebiten.Image
 
@@ -77,11 +135,4 @@ func (g *ebGfx) NewSolid(w, h int, c color.RGBA) (gfx.Image, error) {
 	img := ebiten.NewImage(w, h)
 	img.Fill(c)
 	return ebImage{img: img}, nil
-}
-
-// For future: LoadImage(path) using image.Decode.
-func decodeToEbitImage(src image.Image) *ebiten.Image {
-	b := ebiten.NewImage(src.Bounds().Dx(), src.Bounds().Dy())
-	// Convert via DrawImage from an *image.RGBA; omitted for brevity in M0.
-	return b
 }

@@ -24,25 +24,27 @@ type DrawOptions struct {
 	Tint             Color   // multiply color (defaults to white)
 }
 
-func (o *DrawOptions) Norm() DrawOptions {
-	n := *o
-	if n.ScaleX == 0 {
-		n.ScaleX = 1
-	}
-	if n.ScaleY == 0 {
-		n.ScaleY = 1
-	}
-	return n
-}
-
 // Image is an engine-owned texture handle.
 type Image interface{ IsImage() }
+
+// Font is a loaded font face resource.
+type Font interface{ IsFont() }
+
+// Text is pre-shaped text tied to a font.
+type Text interface{ IsText() }
 
 // Device is the 2D drawing façade used by games.
 type Device interface {
 	NewImage(w, h int) (Image, error)
+	LoadImage(path string) (Image, error)
+
 	Clear(c Color)
 	Draw(img Image, opts *DrawOptions)
+
+	// Text (M1)
+	NewFont(ttf []byte, size float64) (Font, error)
+	NewText(font Font, s string) (Text, error)
+	DrawText(t Text, x, y float64)
 }
 
 // Helper for degrees → radians (nice for samples).

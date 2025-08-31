@@ -28,3 +28,21 @@ func (i *ebInput) KeyDown(k input.Key) bool {
 		return false
 	}
 }
+
+func (i *ebInput) MousePosition() (x, y float64) {
+	xi, yi := ebiten.CursorPosition()
+	return float64(xi), float64(yi)
+}
+
+func (i *ebInput) MouseDown(b input.MouseButton) bool {
+	switch b {
+	case input.MouseLeft:
+		return ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+	case input.MouseRight:
+		return ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight)
+	case input.MouseMiddle:
+		return ebiten.IsMouseButtonPressed(ebiten.MouseButtonMiddle)
+	default:
+		return false
+	}
+}

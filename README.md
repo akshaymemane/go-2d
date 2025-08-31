@@ -1,21 +1,63 @@
-# README.md
+# luvgo (M1)
 
-# go-2d (M0)
+A Go‑native 2D engine with LÖVE‑style ergonomics. Currently at **Milestone 1**: window, update/draw loop, input, images, and text rendering backed by Ebiten.
 
-A Go‑native 2D engine with LÖVE‑style ergonomics. This is **Milestone 0**: window, update/draw loop, input, and a simple draw API backed by Ebiten.
+## Features (so far)
 
-## Quick start
+- Core loop: `Run(Game, Options)`
+- Input: keyboard (Left/Right/Up/Down/Space/Esc)
+- Graphics:
+  - `NewImage(w,h)` → create blank image
+  - `LoadImage(path)` → load PNG/JPG from disk
+  - `Draw(img, opts)` → draw with position/scale/rotation/tint
+  - `Clear(color)` → clear background
+- Text:
+  - `NewFont(ttfBytes, size)` → load TTF font
+  - `NewText(font, "string")` → prepare text object
+  - `DrawText(text, x, y)` → draw text on screen
+
+## Examples
+
+### Hello Sprite
 
 ```bash
-# From the repo root where go.mod lives
 go run ./examples/hello-sprite
 ```
 
-Use ← → to move the square.
+Use ← → keys to move the square.
 
-## Next steps (M1)
+### Text and Image
 
-- Implement `gfx.Device.Clear` properly (currently the backend clears in the ebiten frame).
-- Add image decode + `LoadImage(path)` using `image/*` and `ebiten.NewImageFromImage`.
-- Add basic text (truetype + ebiten/text).
-- Add a small snapshot test harness that renders the example offscreen and image-hashes the frame.
+Place assets:
+
+```
+examples/text-and-image/assets/ship.png
+examples/text-and-image/assets/Inter-Regular.ttf
+```
+
+Run:
+
+```bash
+go run ./examples/text-and-image
+```
+
+You’ll see “Hello, luvgo!” rendered with your font and the PNG drawn below.
+
+## Project layout
+
+```
+/core        – engine entrypoint (Run, Game, Options, Context)
+/gfx         – drawing API
+/input       – keyboard input API
+/internal/backend/ebitengl – Ebiten-based backend implementation
+/examples    – demo programs
+```
+
+## Next milestones
+
+- **M2 Audio**: sound/music playback
+- **M3 Graphics**: Canvas (offscreen), SpriteBatch, Scissor, BlendMode, Mouse API
+
+## License
+
+Same spirit as LÖVE: permissive (zlib/libpng).

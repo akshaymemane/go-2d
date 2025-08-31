@@ -43,6 +43,7 @@ func Run(cfg Config, a *Adapter) error {
 		gfx:     newGfx(),
 		input:   newInput(),
 	}
+	input.SetDevice(game.input)
 	return ebiten.RunGame(game)
 }
 
